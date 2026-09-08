@@ -108,12 +108,14 @@
 
 ## 5. SECRETS
 
-- API keys: default provider is local Ollama (`LLM_PROVIDER=ollama`) — no key needed
-- IF `LLM_PROVIDER=anthropic`: key via `os.environ["ANTHROPIC_API_KEY"]` ONLY
+- API keys: primary is Groq (`LLM_PROVIDER=groq`), fallback is NVIDIA
+  (`LLM_FALLBACK=nvidia`) — keys via `os.environ["GROQ_API_KEY"]` and
+  `os.environ["NVIDIA_API_KEY"]` ONLY (Ollama/Anthropic remain optional)
 - NEVER hardcode a key — not in code, notebooks, prompts, tests, comments
 - `.env` → in `.gitignore`, never committed
 - `.env.example` → committed, placeholder value only
-- BEFORE every commit: grep diff for `sk-`, `api_key`, `ANTHROPIC_API_KEY=<real value>` → if found, STOP, remove, then commit
+- BEFORE every commit: grep diff for `sk-`, `gsk-`, `nvapi-`, `api_key`,
+  `GROQ_API_KEY=<real value>`, `NVIDIA_API_KEY=<real value>` → if found, STOP
 
 ---
 
