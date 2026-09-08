@@ -1,0 +1,27 @@
+"""Run pipeline on val split, compute RES, save analysis CSV."""
+import pandas as pd
+from src.data_loader import load_csv, train_val_split, save_split
+from src.pipeline import generate_report
+from src.scorer import res_case, mean_res
+
+if __name__ == "__main__":
+    df = load_csv("train.csv", ["case_id", "modality", "body_part",
+                                "study_description", "patient_age_band",
+                                "patient_sex", "template_content",
+                                "dictation", "report"])
+    tr, val = train_val_split(df)
+    save_split(tr, val)
+    rows = []
+    for _, r in val.iterrows():
+        try:
+            gen = generate_report(r)
+        except Exception as e:
+            print(f"FAIL {r['case_id']}: {e}")
+            gen = str(r["template_content"])
+        s = res_case(str(r["report"]), gen, str(r["template_content"]))
+        rows.append({"case_id": r["case_id"], "RES": s["RES"], "F": s["F"],
+                     "I": s["I"], "generated": gen,
+                     "reference": r["report"]})
+    out = pd.DataFrame(rows)
+    out.to_csv("outputs/val_results.csv", index=False)
+    print("mean RES:", out["RES"].mean())
