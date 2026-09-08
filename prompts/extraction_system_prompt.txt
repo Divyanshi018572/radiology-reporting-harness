@@ -11,3 +11,19 @@ Schema per item: field_label (copy template label text as-is), matched_template_
 unaffected_subclause (verbatim substring), new_clause_text, laterality, severity,
 acuity, polarity (present/absent), measurement, measurement_unit (null if none).
 If dictation is "normal", return [].
+
+FEW-SHOT 1 (XRAY Chest):
+Template fields: LUNGS: No focal airspace opacity or pulmonary edema. /
+PLEURA: No pleural effusion or pneumothorax.
+Dictation: mild right basilar opacity, small right pleural effusion
+Output: [{"field_label": "LUNGS", "matched_template_span": "No focal airspace opacity or pulmonary edema.", "unaffected_subclause": "No pulmonary edema.", "new_clause_text": "Mild right basilar airspace opacity. No pulmonary edema.", "laterality": "right", "severity": "mild", "acuity": null, "polarity": "present", "measurement": null, "measurement_unit": null}, {"field_label": "PLEURA", "matched_template_span": "No pleural effusion or pneumothorax.", "unaffected_subclause": "No pneumothorax.", "new_clause_text": "Small right pleural effusion. No pneumothorax.", "laterality": "right", "severity": "small", "acuity": null, "polarity": "present", "measurement": null, "measurement_unit": null}]
+
+FEW-SHOT 2 (CT Shoulder, train cf0b9edb):
+Template fields: GLENOHUMERAL JOINT: Normal alignment. No dislocation or subluxation. / ACROMIOCLAVICULAR JOINT: Unremarkable.
+Dictation: moderate to severe ac joint space narrowing with sclerosis and spurs. mild joint space narrowing of glenohumeral joint
+Output: [{"field_label": "ACROMIOCLAVICULAR JOINT", "matched_template_span": "Unremarkable.", "unaffected_subclause": "", "new_clause_text": "There is moderate to severe AC joint space narrowing with sclerosis and spurs.", "laterality": null, "severity": "moderate to severe", "acuity": null, "polarity": "present", "measurement": null, "measurement_unit": null}, {"field_label": "GLENOHUMERAL JOINT", "matched_template_span": "Normal alignment.", "unaffected_subclause": "No dislocation or subluxation.", "new_clause_text": "There is mild joint space narrowing of the glenohumeral joint. There is no dislocation or subluxation.", "laterality": null, "severity": "mild", "acuity": null, "polarity": "present", "measurement": null, "measurement_unit": null}]
+
+FEW-SHOT 3 (MRI Brain, real train row):
+Template fields: BRAIN: No restricted diffusion to indicate acute infarction. / SINUSES AND MASTOIDS: The paranasal sinuses and mastoid air cells are clear.
+Dictation: atrophy mild, leuko, focal gre blooming along falx - likely calcific focus, left maxillary sinusitis
+Output: [{"field_label": "BRAIN", "matched_template_span": "No restricted diffusion to indicate acute infarction.", "unaffected_subclause": "No restricted diffusion to indicate acute infarction.", "new_clause_text": "There is mild atrophy. There are findings of leukoaraiosis. There is a focal GRE blooming along the falx, likely representing a calcific focus. No restricted diffusion to indicate acute infarction.", "laterality": null, "severity": "mild", "acuity": "chronic", "polarity": "present", "measurement": null, "measurement_unit": null}, {"field_label": "SINUSES AND MASTOIDS", "matched_template_span": "The paranasal sinuses and mastoid air cells are clear.", "unaffected_subclause": "The remaining paranasal sinuses and the mastoid air cells are clear.", "new_clause_text": "There is left maxillary sinusitis. The remaining paranasal sinuses and the mastoid air cells are clear.", "laterality": "left", "severity": null, "acuity": null, "polarity": "present", "measurement": null, "measurement_unit": null}]
