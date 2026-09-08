@@ -46,3 +46,21 @@ def test_unmapped_dropped_without_other():
           "unaffected_subclause": "", "new_clause_text": "Small cyst."}]
     fields, _ = apply_merge(tpl2, f, case_id="t")
     assert all("Small cyst" not in v for v in fields.values())
+
+
+def test_multi_finding_ordering_left_to_right():
+    tpl = ("FINDINGS:\nLUNGS: No nodule. No effusion. No pneumothorax.\n\n"
+           "IMPRESSION:\nNormal.")
+    f = [{"field_label": "LUNGS",
+          "matched_template_span": "No effusion.",
+          "unaffected_subclause": "",
+          "new_clause_text": "Small effusion."},
+         {"field_label": "LUNGS",
+          "matched_template_span": "No nodule.",
+          "unaffected_subclause": "",
+          "new_clause_text": "5 mm nodule."}]
+    fields, changed = apply_merge(tpl, f, case_id="t")
+    assert "LUNGS" in changed
+    assert "5 mm nodule." in fields["LUNGS"]
+    assert "Small effusion." in fields["LUNGS"]
+    assert "No pneumothorax." in fields["LUNGS"]
