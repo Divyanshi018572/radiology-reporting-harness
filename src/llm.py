@@ -6,6 +6,23 @@ import urllib.request
 
 GROQ_BASE = "https://api.groq.com/openai/v1/chat/completions"
 NVIDIA_BASE = "https://integrate.api.nvidia.com/v1/chat/completions"
+
+
+def _load_dotenv(path: str = ".env") -> None:
+    """Load KEY=VALUE lines into environ (no override), return None."""
+    try:
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip().strip("\"'"))
+    except FileNotFoundError:
+        pass
+
+
+_load_dotenv()
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 
