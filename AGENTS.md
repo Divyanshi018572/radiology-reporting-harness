@@ -110,7 +110,7 @@
 
 - API keys: primary is Groq (`LLM_PROVIDER=groq`), fallback is NVIDIA
   (`LLM_FALLBACK=nvidia`) — keys via `os.environ["GROQ_API_KEY"]` and
-  `os.environ["NVIDIA_API_KEY"]` ONLY (Ollama/Anthropic remain optional)
+  `os.environ["NVIDIA_API_KEY"]` ONLY (Anthropic remains optional)
 - NEVER hardcode a key — not in code, notebooks, prompts, tests, comments
 - `.env` → in `.gitignore`, never committed
 - `.env.example` → committed, placeholder value only

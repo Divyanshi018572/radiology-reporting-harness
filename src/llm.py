@@ -1,4 +1,4 @@
-"""LLM provider switch: Groq primary, NVIDIA fallback, Ollama/Anthropic optional."""
+"""LLM provider switch: Groq primary, NVIDIA fallback."""
 import json
 import os
 import time
@@ -23,7 +23,6 @@ def _load_dotenv(path: str = ".env") -> None:
 
 
 _load_dotenv()
-OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 
 def get_provider() -> str:
@@ -59,7 +58,7 @@ def _groq_chat(system: str, user: str, max_tokens: int,
     """Call Groq (free tier, key required), return text."""
     return _openai_compat(
         GROQ_BASE, os.environ["GROQ_API_KEY"],
-        os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
+        os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant"),
         system, user, max_tokens, json_mode)
 
 
@@ -68,27 +67,9 @@ def _nvidia_chat(system: str, user: str, max_tokens: int,
     """Call NVIDIA Build (free tier, key required), return text."""
     return _openai_compat(
         NVIDIA_BASE, os.environ["NVIDIA_API_KEY"],
-        os.environ.get("NVIDIA_MODEL", "meta/llama-3.3-70b-instruct"),
+        os.environ.get("NVIDIA_MODEL",
+                       "meta/llama-3.2-11b-vision-instruct"),
         system, user, max_tokens, json_mode)
-
-
-def _ollama_chat(system: str, user: str, json_mode: bool,
-                 num_ctx: int = 8192) -> str:
-    """POST to local Ollama /api/chat, return message content."""
-    model = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b-instruct")
-    payload: dict = {"model": model,
-                     "messages": [{"role": "system", "content": system},
-                                  {"role": "user", "content": user}],
-                     "stream": False, "options": {"temperature": 0.0,
-                                                 "num_ctx": num_ctx}}
-    if json_mode:
-        payload["format"] = "json"
-    req = urllib.request.Request(
-        f"{OLLAMA_HOST}/api/chat", data=json.dumps(payload).encode(),
-        headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=600) as resp:
-        body = json.loads(resp.read().decode())
-    return str(body["message"]["content"])
 
 
 def _anthropic_chat(system: str, user: str, max_tokens: int) -> str:
@@ -112,7 +93,7 @@ def _once(provider: str, system: str, user: str, max_tokens: int,
         return _nvidia_chat(system, user, max_tokens, json_mode)
     if provider == "anthropic":
         return _anthropic_chat(system, user, max_tokens)
-    return _ollama_chat(system, user, json_mode)
+    raise ValueError(f"unknown LLM provider: {provider}")
 
 
 def chat(system: str, user: str, max_tokens: int = 2000,
