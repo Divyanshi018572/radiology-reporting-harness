@@ -25,6 +25,18 @@ def test_touched_replaced_with_verification():
     assert "LUNGS" not in changed
 
 
+def test_partial_span_splice_preserves_sibling_verbatim():
+    tpl = ("FINDINGS:\nLUNGS: No focal airspace opacity or pulmonary "
+           "edema.\n\nIMPRESSION:\nNormal.")
+    f = [{"field_label": "LUNGS",
+          "matched_template_span": "No focal airspace opacity",
+          "unaffected_subclause": "or pulmonary edema.",
+          "new_clause_text": "Mild right basilar airspace opacity"}]
+    fields, changed = apply_merge(tpl, f, case_id="t")
+    assert fields["LUNGS"] == "Mild right basilar airspace opacity or " \
+        "pulmonary edema."
+
+
 def test_span_failure_fallback():
     f = [{"field_label": "PLEURA", "matched_template_span": "NOT IN TEMPLATE",
           "unaffected_subclause": "", "new_clause_text": "Bad edit."}]

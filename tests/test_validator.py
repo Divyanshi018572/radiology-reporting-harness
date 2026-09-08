@@ -40,3 +40,14 @@ def test_blank_lines_and_numbering_allowed():
     ok = ("FINDINGS:\nLUNGS: Clear.\n\nPLEURA: No effusion.\n\n"
           "IMPRESSION:\n1. Normal.")
     assert validate_report(ok, TPL, set())[0]
+
+
+def test_duplicate_impression_rejected():
+    bad = GOOD + "\nIMPRESSION:\nAgain."
+    assert not validate_report(bad, TPL)[0]
+
+
+def test_case_insensitive_labels_pass():
+    ok = ("FINDINGS:\nlungs: Clear.\npleura: No effusion.\n\n"
+          "IMPRESSION:\nNormal.")
+    assert validate_report(ok, TPL, set())[0]
