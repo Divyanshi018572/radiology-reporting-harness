@@ -1,8 +1,7 @@
-"""Stage 1 extraction: dictation -> clause-level findings JSON via Anthropic."""
+"""Stage 1 extraction: dictation -> clause-level findings JSON via LLM."""
 import json
-import os
-import time
 import pandas as pd
+from src.llm import chat
 
 SYSTEM_PROMPT_FILE = "prompts/extraction_system_prompt.txt"
 
@@ -11,26 +10,6 @@ def load_system_prompt() -> str:
     """Load extraction system prompt text, return string."""
     with open(SYSTEM_PROMPT_FILE) as f:
         return f.read()
-
-
-def call_llm(system: str, user: str, temperature: float = 0.0,
-              retries: int = 2) -> str:
-    """Call Anthropic with backoff, return raw text."""
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    for attempt in range(retries + 1):
-        try:
-            msg = client.messages.create(
-                model="claude-sonnet-4-20250514", max_tokens=2000,
-                temperature=temperature,
-                system=system, messages=[{"role": "user", "content": user}])
-            return str(msg.content[0].text)
-        except Exception as e:
-            if attempt >= retries:
-                raise
-            time.sleep(2 ** attempt)
-            _ = e
-    raise RuntimeError("unreachable")
 
 
 def extract_findings(row: pd.Series) -> list[dict]:
@@ -43,10 +22,10 @@ def extract_findings(row: pd.Series) -> list[dict]:
             f"Template:\n{row['template_content']}\n"
             f"Dictation:\n{row['dictation']}\n"
             "Return ONLY the JSON array.")
-    raw = call_llm(system, user, temperature=0.0)
+    raw = chat(system, user, max_tokens=2000, json_mode=True)
     try:
         return json.loads(raw)
     except json.JSONDecodeError as e:
-        raw2 = call_llm(system + f"\nFix this JSON error: {e}\n{raw}",
-                         user, temperature=0.0)
+        raw2 = chat(system + f"\nFix this JSON error: {e}\n{raw}", user,
+                    max_tokens=2000, json_mode=True)
         return json.loads(raw2)

@@ -108,7 +108,8 @@
 
 ## 5. SECRETS
 
-- API keys: `os.environ["ANTHROPIC_API_KEY"]` ONLY
+- API keys: default provider is local Ollama (`LLM_PROVIDER=ollama`) — no key needed
+- IF `LLM_PROVIDER=anthropic`: key via `os.environ["ANTHROPIC_API_KEY"]` ONLY
 - NEVER hardcode a key — not in code, notebooks, prompts, tests, comments
 - `.env` → in `.gitignore`, never committed
 - `.env.example` → committed, placeholder value only
