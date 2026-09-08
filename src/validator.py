@@ -23,8 +23,11 @@ def validate_report(report: str, template_content: str,
     if "_UNLABELLED_" in sub_f and sub_f["_UNLABELLED_"].strip():
         return False, "unlabelled FINDINGS content"
     if changed is not None:
+        sub_by_norm = {norm_label(k): v for k, v in sub_f.items()}
+        changed_norm = {norm_label(k) for k in changed}
         for k in tpl_f:
-            if k not in changed and sub_f.get(k, "").strip() != \
+            if norm_label(k) not in changed_norm and \
+                    sub_by_norm.get(norm_label(k), "").strip() != \
                     tpl_f[k].strip():
                 return False, f"untouched field rewritten: {k}"
     return True, None
