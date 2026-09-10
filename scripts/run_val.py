@@ -11,8 +11,15 @@ if __name__ == "__main__":
                                 "dictation", "report"])
     tr, val = train_val_split(df)
     save_split(tr, val)
+    done_path = "outputs/val_results.csv"
+    try:
+        done = pd.read_csv(done_path)["case_id"].tolist()
+    except (FileNotFoundError, pd.errors.EmptyDataError):
+        done = []
     rows = []
     for _, r in val.iterrows():
+        if r["case_id"] in done:
+            continue
         try:
             gen = generate_report(r)
         except Exception as e:
@@ -22,6 +29,9 @@ if __name__ == "__main__":
         rows.append({"case_id": r["case_id"], "RES": s["RES"], "F": s["F"],
                      "I": s["I"], "generated": gen,
                      "reference": r["report"]})
-    out = pd.DataFrame(rows)
-    out.to_csv("outputs/val_results.csv", index=False)
+        pd.DataFrame(rows).to_csv(done_path, mode="a", index=False,
+                                  header=not done and not rows[:-1])
+        done.append(r["case_id"])
+    out = pd.read_csv(done_path)
+    print(f"rows: {len(out)}/{len(val)}")
     print("mean RES:", out["RES"].mean())
