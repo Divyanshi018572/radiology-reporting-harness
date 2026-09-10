@@ -26,12 +26,11 @@ if __name__ == "__main__":
             print(f"FAIL {r['case_id']}: {e}")
             gen = str(r["template_content"])
         s = res_case(str(r["report"]), gen, str(r["template_content"]))
-        rows.append({"case_id": r["case_id"], "RES": s["RES"], "F": s["F"],
-                     "I": s["I"], "generated": gen,
-                     "reference": r["report"]})
-        pd.DataFrame(rows).to_csv(done_path, mode="a", index=False,
-                                  header=not done and not rows[:-1])
+        pd.DataFrame([{"case_id": r["case_id"], "RES": s["RES"], "F": s["F"],
+                       "I": s["I"], "generated": gen,
+                       "reference": r["report"]}]).to_csv(
+            done_path, mode="a", index=False, header=not done)
         done.append(r["case_id"])
-    out = pd.read_csv(done_path)
+    out = pd.read_csv(done_path).drop_duplicates("case_id", keep="first")
     print(f"rows: {len(out)}/{len(val)}")
     print("mean RES:", out["RES"].mean())
