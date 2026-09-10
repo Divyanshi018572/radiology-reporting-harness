@@ -11,17 +11,26 @@ if __name__ == "__main__":
                                 "dictation", "report"])
     tr, val = train_val_split(df)
     save_split(tr, val)
+    done_path = "outputs/val_results.csv"
+    try:
+        done = pd.read_csv(done_path)["case_id"].tolist()
+    except (FileNotFoundError, pd.errors.EmptyDataError):
+        done = []
     rows = []
     for _, r in val.iterrows():
+        if r["case_id"] in done:
+            continue
         try:
             gen = generate_report(r)
         except Exception as e:
             print(f"FAIL {r['case_id']}: {e}")
             gen = str(r["template_content"])
         s = res_case(str(r["report"]), gen, str(r["template_content"]))
-        rows.append({"case_id": r["case_id"], "RES": s["RES"], "F": s["F"],
-                     "I": s["I"], "generated": gen,
-                     "reference": r["report"]})
-    out = pd.DataFrame(rows)
-    out.to_csv("outputs/val_results.csv", index=False)
+        pd.DataFrame([{"case_id": r["case_id"], "RES": s["RES"], "F": s["F"],
+                       "I": s["I"], "generated": gen,
+                       "reference": r["report"]}]).to_csv(
+            done_path, mode="a", index=False, header=not done)
+        done.append(r["case_id"])
+    out = pd.read_csv(done_path).drop_duplicates("case_id", keep="first")
+    print(f"rows: {len(out)}/{len(val)}")
     print("mean RES:", out["RES"].mean())

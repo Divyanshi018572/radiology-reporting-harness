@@ -11,6 +11,15 @@ Schema per item: field_label (copy template label text as-is), matched_template_
 unaffected_subclause (verbatim substring), new_clause_text, laterality, severity,
 acuity, polarity (present/absent), measurement, measurement_unit (null if none).
 If dictation is "normal", return [].
+CHECKLIST (verify each item before output):
+1. matched_template_span and unaffected_subclause are character-for-character
+copies from template_content — NEVER paraphrase, fix spelling, or reorder words.
+2. field_label is copied exactly from a template field label — NEVER invent,
+abbreviate, or split labels (no FINDINGS/IMPRESSION as labels).
+3. new_clause_text is 1-2 sentences, only the dictated abnormality plus any
+verbatim surviving subclause — no rambling, no extra sentences.
+4. Every item carries explicit laterality/severity/negation/measurement exactly
+as dictated; use null only when truly absent.
 
 FEW-SHOT 1 (XRAY Chest):
 Template fields: LUNGS: No focal airspace opacity or pulmonary edema. /
